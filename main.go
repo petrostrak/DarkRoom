@@ -14,11 +14,13 @@ func myHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// status codes should be written before any template rendering
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "<h1>We could not find the page you were looking for.</h1>")
+		fmt.Fprint(w, "<h1>We could not find the page you were looking for :(</h1>")
 	}
 }
 
 func main() {
-	http.HandleFunc("/", myHandler)
-	http.ListenAndServe(":3000", nil)
+	mux := &http.ServeMux{}
+	mux.HandleFunc("/", myHandler)
+	// http.HandleFunc("/", myHandler)
+	http.ListenAndServe(":3000", mux)
 }
