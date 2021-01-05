@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func myHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,9 +20,19 @@ func myHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func secondHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	fmt.Fprint(w, "<h1>This is a practice web page, cheers!</h1>")
+}
+
+func hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	fmt.Fprintf(w, "hello, %s\n", ps.ByName("name"))
+}
+
+// go get github.com/julienschmidt/httprouter
 func main() {
-	mux := &http.ServeMux{}
-	mux.HandleFunc("/", myHandler)
+	router := httprouter.New()
+	router.GET("/hello/:name", hello)
 	// http.HandleFunc("/", myHandler)
-	http.ListenAndServe(":3000", mux)
+	http.ListenAndServe(":3000", router)
 }
