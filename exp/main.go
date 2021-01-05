@@ -19,6 +19,7 @@ func main() {
 		Name: "Petros Trak",
 	}
 
+	data.Name = "<script>alert('hi')</script>"
 	err = t.Execute(os.Stdout, data)
 	if err != nil {
 		panic(err)
