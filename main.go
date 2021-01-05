@@ -30,6 +30,7 @@ func faq(w http.ResponseWriter, r *http.Request) {
 }
 
 func handle404(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprint(w, "<h1>We could not find the page you were looking for :(</h1>")
 
@@ -41,7 +42,7 @@ func main() {
 	r.HandleFunc("/", home)
 	r.HandleFunc("/contact", contact)
 	r.HandleFunc("/faq", faq)
-	// r.NotFoundHandler("", handle404)
+	r.NotFoundHandler = http.HandlerFunc(handle404)
 	// http.HandleFunc("/", myHandler)
 	http.ListenAndServe(":3000", r)
 }
