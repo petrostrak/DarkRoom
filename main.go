@@ -48,7 +48,6 @@ func handle404(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// go get github.com/julienschmidt/httprouter
 func main() {
 	homeView = views.NewView("bootstrap", "views/home.gohtml")
 	contactView = views.NewView("bootstrap", "views/contact.gohtml")
