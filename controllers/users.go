@@ -4,11 +4,19 @@ import (
 	"DarkRoom/views"
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/schema"
 )
 
 // The Users structure
 type Users struct {
 	NewView *views.View
+}
+
+// The SignupForm struct for signing up
+type SignupForm struct {
+	Email    string `schema:"email"`
+	Password string `schema:"password"`
 }
 
 // NewUsers is used to create a new Users controller.
@@ -36,7 +44,12 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		panic(err)
 	}
-	fmt.Fprintln(w, r.PostForm["email"])
-	fmt.Fprintln(w, r.PostForm["password"])
-	fmt.Fprintln(w, "This is a temporary response")
+
+	decoder := schema.NewDecoder()
+	var form SignupForm
+
+	if err := decoder.Decode(&form, r.PostForm); err != nil {
+		panic(err)
+	}
+	fmt.Fprintln(w, form)
 }
