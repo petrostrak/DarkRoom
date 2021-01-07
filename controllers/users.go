@@ -6,14 +6,19 @@ import (
 	"net/http"
 )
 
+// The Users structure
+type Users struct {
+	NewView *views.View
+}
+
+// NewUsers is used to create a new Users controller.
+// This function will panic if the templates are not
+// parsed correctly, and should only be used during
+// initial setup.
 func NewUsers() *Users {
 	return &Users{
 		NewView: views.NewView("bootstrap", "views/users/new.gohtml"),
 	}
-}
-
-type Users struct {
-	NewView *views.View
 }
 
 //This is used to render the form where a user can create a new user account
