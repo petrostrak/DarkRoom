@@ -4,8 +4,6 @@ import (
 	"DarkRoom/views"
 	"fmt"
 	"net/http"
-
-	"github.com/gorilla/schema"
 )
 
 // The Users structure
@@ -41,14 +39,8 @@ func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 //
 // POST /signup
 func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		panic(err)
-	}
-
-	decoder := schema.NewDecoder()
 	var form SignupForm
-
-	if err := decoder.Decode(&form, r.PostForm); err != nil {
+	if err := parseForm(r, &form); err != nil {
 		panic(err)
 	}
 	fmt.Fprintln(w, form)
