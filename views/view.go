@@ -8,13 +8,18 @@ import (
 
 var (
 	LayoutDir   string = "views/layouts/"
+	TemplateDir string = "views/"
 	TemplateExt string = ".gohtml"
 )
 
 // NewView func to instantiate view objects
 func NewView(layout string, files ...string) *View {
+	// fmt.Println("Before:", files)
+	addTemplatePath(files)
+	// fmt.Println("after path:", files)
+	addTemplateExt(files)
+	// fmt.Println("after ext:", files)
 	files = append(files, layoutFiles()...)
-
 	t, err := template.ParseFiles(files...)
 	if err != nil {
 		panic(err)
@@ -50,4 +55,26 @@ func layoutFiles() []string {
 		panic(err)
 	}
 	return files
+}
+
+// takes in a slice of strings representing file path
+// for templates and it prepends the TemplateDir to each
+// in the slice
+// e.g. the input {"home"} would result in the output
+// {"views/home"} if TemplateDir == "views/"
+func addTemplatePath(files []string) {
+	for i, f := range files {
+		files[i] = TemplateDir + f
+	}
+}
+
+// takes in a slice of strings representing file path for
+// templates and it appends the TemplateExt extension to each
+// string in the slice
+// e.g. the input {"home"} would result in the output
+// {"home.gohtml"} if TemplateDir == ".gohtml"
+func addTemplateExt(files []string) {
+	for i, f := range files {
+		files[i] = f + TemplateExt
+	}
 }
