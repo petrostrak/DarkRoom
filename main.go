@@ -1,8 +1,8 @@
 package main
 
 import (
+	"DarkRoom/controllers"
 	"DarkRoom/views"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,7 +11,6 @@ import (
 var (
 	homeView    *views.View
 	contactView *views.View
-	signupView  *views.View
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -24,41 +23,16 @@ func contact(w http.ResponseWriter, r *http.Request) {
 	must(contactView.Render(w, nil))
 }
 
-func signup(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	must(signupView.Render(w, nil))
-}
-
-// func error(w http.ResponseWriter, r *http.Request) {
-// 	w.WriteHeader(http.StatusNotFound)
-// 	fmt.Fprint(w, "<h1>We could not find the page you were looking for :(</h1>")
-// }
-
-func faq(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, "<h1>This is the FAQ page</h1>")
-	fmt.Fprint(w, "<h2>Below you' ll find more info regarding the site</h2>")
-	fmt.Fprint(w, "<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum</p>")
-}
-
-func handle404(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprint(w, "<h1>We could not find the page you were looking for :(</h1>")
-
-}
-
 func main() {
 	homeView = views.NewView("bootstrap", "views/home.gohtml")
 	contactView = views.NewView("bootstrap", "views/contact.gohtml")
-	signupView = views.NewView("bootstrap", "views/signup.gohtml")
+	usersC := controllers.NewUsers()
+
 	r := mux.NewRouter()
-	r.HandleFunc("/", home)
-	r.HandleFunc("/contact", contact)
-	r.HandleFunc("/signup", signup)
-	r.HandleFunc("/faq", faq)
-	r.NotFoundHandler = http.HandlerFunc(handle404)
-	// http.HandleFunc("/", myHandler)
+	r.HandleFunc("/", home).Methods("GET")
+	r.HandleFunc("/contact", contact).Methods("GET")
+	r.HandleFunc("/signup", usersC.New).Methods("GET")
+	r.HandleFunc("/signup", usersC.Create).Methods("POST")
 	http.ListenAndServe(":3000", r)
 }
 
