@@ -32,7 +32,9 @@ func NewUsers() *Users {
 // GET /signup
 func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	u.NewView.Render(w, nil)
+	if err := u.NewView.Render(w, nil); err != nil {
+		panic(err)
+	}
 }
 
 // This is used to process the signup form when a user tries to create a new user account
