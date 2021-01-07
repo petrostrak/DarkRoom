@@ -22,6 +22,7 @@ func NewUsers() *Users {
 }
 
 //This is used to render the form where a user can create a new user account
+//
 // GET /signup
 func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
@@ -29,7 +30,8 @@ func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 }
 
 // This is used to process the signup form when a user tries to create a new user account
+//
 // POST /signup
 func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "This is a message to pretend that we created the user account")
+	fmt.Fprintln(w, "This is a temporary response")
 }
