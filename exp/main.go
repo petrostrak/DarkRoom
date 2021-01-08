@@ -24,14 +24,37 @@ func main() {
 	}
 	defer db.Close()
 
-	var id int
-	err = db.QueryRow(`
-		INSERT INTO users(age, first_name, last_name, email)
-		VALUES ($1, $2, $3, $4) RETURNING id`,
-		36, "Maria", "Geo", "mariageo@gmail.com",
-	).Scan(&id)
+	type User struct {
+		id, age                    int
+		firstName, lastName, email string
+	}
+
+	var users []User
+	// var id, age int
+	// var firstName, lastName, email string
+
+	// err = db.QueryRow(`
+	// 	INSERT INTO users(age, first_name, last_name, email)
+	// 	VALUES ($1, $2, $3, $4) RETURNING id`,
+	// 	36, "Maria", "Geo", "mariageo@gmail.com",
+	// ).Scan(&id)
+
+	// err = db.QueryRow(`
+	// SELECT id, first_name, email FROM users WHERE id=$1`, 3).Scan(&id, &name, &email)
+
+	rows, err := db.Query(`
+	SELECT id, age, first_name, last_name, email FROM users WHERE age > $1`, 30)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("id:", id)
+	defer rows.Close()
+	for rows.Next() {
+		var user User
+		if err = rows.Scan(&user.id, &user.age, &user.firstName, &user.lastName, &user.email); err != nil {
+			panic(err)
+		}
+		// fmt.Println("id:", id, "Age:", age, "First name:", firstName, "Last name:", lastName, "Email:", email)
+		users = append(users, user)
+		fmt.Println(users)
+	}
 }
