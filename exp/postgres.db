@@ -1,0 +1,9 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    age INT,
+    first_name TEXT,
+    last_name TEXT,
+    email TEXT UNIQUE NOT NULL
+);
+
+INSERT INTO users (age, email, first_name, last_name) VALUES (34, 'petrostrak@gmail.com', 'Petros', 'Trak');
