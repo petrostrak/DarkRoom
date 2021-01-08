@@ -22,12 +22,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// defer db.Close()
+	defer db.Close()
 
-	err = db.Ping()
+	var id int
+	err = db.QueryRow(`
+		INSERT INTO users(age, first_name, last_name, email)
+		VALUES ($1, $2, $3, $4) RETURNING id`,
+		36, "Maria", "Geo", "mariageo@gmail.com",
+	).Scan(&id)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Successfully connecterd!")
-	db.Close()
+	fmt.Println("id:", id)
 }
