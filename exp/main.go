@@ -1,10 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 const (
@@ -18,12 +18,14 @@ const (
 func main() {
 	// %s for string, %d for int
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	db, err := sql.Open("postgres", psqlInfo)
+	db, err := gorm.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-
+	if err := db.DB().Ping(); err != nil {
+		panic(err)
+	}
 	// type User struct {
 	// 	id, age                    int
 	// 	firstName, lastName, email string
@@ -41,9 +43,9 @@ func main() {
 
 	// err = db.QueryRow(`
 	// SELECT id, first_name, email FROM users WHERE id=$1`, 3).Scan(&id, &name, &email)
-	_, err = db.Exec(`
-	SELECT * FROM users
-	INNER JOIN orders ON users.id=orders.user_id`)
+	// _, err = db.Exec(`
+	// SELECT * FROM users
+	// INNER JOIN orders ON users.id=orders.user_id`)
 	// for i := 1; i <= 6; i++ {
 	// 	userID := 1
 	// 	if i > 3 {
