@@ -6,4 +6,11 @@ CREATE TABLE users (
     email TEXT UNIQUE NOT NULL
 );
 
+CREATE TABLE orders (
+	id SERIAL PRIMARY KEY,
+	user_id int,
+	amount int,
+	description TEXT
+);
+
 INSERT INTO users (age, email, first_name, last_name) VALUES (34, 'petrostrak@gmail.com', 'Petros', 'Trak');
