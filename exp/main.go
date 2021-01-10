@@ -39,7 +39,7 @@ func main() {
 	db.AutoMigrate(&User{})
 
 	var u User
-	newDB := db.Where("id = ?", 4)
+	// newDB := db.Where("id = ?", 4)
 	db.Where("color = ?", "red").Where("id > ?", 4)
 	var users []User
 	db.Find(&users)
