@@ -15,6 +15,12 @@ const (
 	dbname   = "darkroom_dev"
 )
 
+type User struct {
+	gorm.Model
+	Name  string
+	Email string `gorm:"not null;unique"`
+}
+
 func main() {
 	// %s for string, %d for int
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
@@ -26,6 +32,10 @@ func main() {
 	if err := db.DB().Ping(); err != nil {
 		panic(err)
 	}
+
+	db.DropTableIfExists(&User{})
+	db.AutoMigrate(&User{})
+
 	// type User struct {
 	// 	id, age                    int
 	// 	firstName, lastName, email string
