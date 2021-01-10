@@ -1,10 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -33,41 +30,48 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
-	if err := db.DB().Ping(); err != nil {
-		panic(err)
-	}
+	// if err := db.DB().Ping(); err != nil {
+	// 	panic(err)
+	// }
 
 	db.LogMode(true) // tracks the sql commands running behind the scenes
 	// db.DropTableIfExists(&User{})
 	db.AutoMigrate(&User{})
 
-	name, email, color := getInfo()
-	u := User{
-		Name:  name,
-		Email: email,
-		Color: color,
-	}
+	var u User
+	newDB := db.Where("id = ?", 4)
+	db.Where("color = ?", "red").Where("id > ?", 4)
+	var users []User
+	db.Find(&users)
+	fmt.Println(len(users))
 
-	// Inserts the value to db
-	if err = db.Create(&u).Error; err != nil {
-		panic(err)
-	}
-	fmt.Println(u)
+	// name, email, color := getInfo()
+	// u := User{
+	// 	Name:  name,
+	// 	Email: email,
+	// 	Color: color,
+	// }
+
+	// // Inserts the value to db
+	// if err = db.Create(&u).Error; err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(u)
 }
 
-func getInfo() (name, email, color string) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("What is your name?")
-	name, _ = reader.ReadString('\n')
-	fmt.Println("What is your email?")
-	email, _ = reader.ReadString('\n')
-	fmt.Println("What is your favorite colort?")
-	color, _ = reader.ReadString('\n')
-	name = strings.TrimSpace(name)
-	email = strings.TrimSpace(email)
-	color = strings.TrimSpace(color)
-	return name, email, color
-}
+// func getInfo() (name, email, color string) {
+// 	reader := bufio.NewReader(os.Stdin)
+// 	fmt.Println("What is your name?")
+// 	name, _ = reader.ReadString('\n')
+// 	fmt.Println("What is your email?")
+// 	email, _ = reader.ReadString('\n')
+// 	fmt.Println("What is your favorite colort?")
+// 	color, _ = reader.ReadString('\n')
+// 	name = strings.TrimSpace(name)
+// 	email = strings.TrimSpace(email)
+// 	color = strings.TrimSpace(color)
+// 	return name, email, color
+// }
 
 // type User struct {
 // 	id, age                    int
