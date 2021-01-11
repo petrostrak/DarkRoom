@@ -44,7 +44,7 @@ func main() {
 	db.AutoMigrate(&User{}, &Order{})
 
 	var u User
-	if err := db.First(&u).Error; err != nil {
+	if err := db.Preload("Orders").First(&u).Error; err != nil {
 		panic(err)
 	}
 	createOrder(db, u, 1001, "Just a description #1")
