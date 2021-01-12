@@ -53,6 +53,12 @@ func (us UserService) ById(id uint) (*User, error) {
 	}
 }
 
+// we don't return the user, instead we update the one we pass in
+// therefore we use a pointer to User
+func (us *UserService) Create(user *User) error {
+	return us.db.Create(user).Error
+}
+
 // closes the UserService db connection
 func (us *UserService) Close() error {
 	return us.db.Close()
