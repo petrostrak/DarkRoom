@@ -53,6 +53,20 @@ func (us UserService) ById(id uint) (*User, error) {
 	}
 }
 
+// will look up by the email provided
+func (us *UserService) ByEmail(email string) (*User, error) {
+	var user User
+	err := us.db.Where("email = ?", email).First(&user).Error
+	switch err {
+	case nil:
+		return &user, nil
+	case gorm.ErrRecordNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
 // we don't return the user, instead we update the one we pass in
 // therefore we use a pointer to User
 func (us *UserService) Create(user *User) error {
