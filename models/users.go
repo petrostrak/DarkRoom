@@ -33,7 +33,7 @@ type UserService struct {
 	db *gorm.DB
 }
 
-// ById will look up by the id provided
+// ById will look up a user by the id provided
 // 1 - user, nil. If user is found, return a nil error
 // 2 - nil, ErrNotFound. If user not found, return ErrNotFound
 // 3 - otherError. If other error occurs, return error in detail
@@ -42,29 +42,31 @@ type UserService struct {
 // result in a 500 error.
 func (us UserService) ById(id uint) (*User, error) {
 	var user User
-	err := us.db.Where("id = ?", id).First(&user).Error
-	switch err {
-	case nil:
-		return &user, nil
-	case gorm.ErrRecordNotFound:
-		return nil, ErrNotFound
-	default:
-		return nil, err
-	}
+	db := us.db.Where("id = ?", id)
+	err := first(db, &user)
+	return &user, err
 }
 
-// will look up by the email provided
+// will look up a user by the email provided
+// 1 - user, nil. If user is found, return a nil error
+// 2 - nil, ErrNotFound. If user not found, return ErrNotFound
+// 3 - otherError. If other error occurs, return error in detail
+//
+// As a general rule, any error but ErrNotFound should probably
+// result in a 500 error.
 func (us *UserService) ByEmail(email string) (*User, error) {
 	var user User
-	err := us.db.Where("email = ?", email).First(&user).Error
-	switch err {
-	case nil:
-		return &user, nil
-	case gorm.ErrRecordNotFound:
-		return nil, ErrNotFound
-	default:
-		return nil, err
+	db := us.db.Where("email = ?", email)
+	err := first(db, &user)
+	return &user, err
+}
+
+func first(db *gorm.DB, user *User) error {
+	err := db.First(user).Error
+	if err == gorm.ErrRecordNotFound {
+		return ErrNotFound
 	}
+	return err
 }
 
 // we don't return the user, instead we update the one we pass in
