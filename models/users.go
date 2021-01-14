@@ -12,7 +12,7 @@ var (
 	ErrNotFound = errors.New("models: resource not fould")
 	// is returned when an invalid ID is provided to a method
 	// like Delete
-	ErrInvalidID = error.New("models: ID provided was invalid")
+	ErrInvalidID = errors.New("models: ID provided was invalid")
 )
 
 func NewUserService(connectionInfo string) (*UserService, error) {
@@ -27,9 +27,18 @@ func NewUserService(connectionInfo string) (*UserService, error) {
 }
 
 // drops user table and rebuilds it
-func (us *UserService) DestructiveReset() {
-	us.db.DropTableIfExists(&User{})
-	us.db.AutoMigrate(&User{})
+func (us *UserService) DestructiveReset() error {
+	if err := us.db.DropTableIfExists(&User{}).Error; err != nil {
+		return err
+	}
+	return us.AutoMigrate()
+}
+
+func (us *UserService) AutoMigrate() error {
+	if err := us.db.AutoMigrate(&User{}).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 type UserService struct {
