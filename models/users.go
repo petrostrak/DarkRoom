@@ -5,6 +5,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -87,6 +88,13 @@ func first(db *gorm.DB, dst interface{}) error {
 // we don't return the user, instead we update the one we pass in
 // therefore we use a pointer to User
 func (us *UserService) Create(user *User) error {
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	// convert bytes to string
+	user.PasswordHash = string(hashedBytes)
+	user.Password = ""
 	return us.db.Create(user).Error
 }
 
@@ -114,4 +122,7 @@ type User struct {
 	gorm.Model
 	Name  string
 	Email string `gorm:"not null;unigue"`
+	// with "-" we say gorm not to save this field in the DB
+	Password     string `gorm:"-"`
+	PasswordHash string `gorm:"not null"`
 }
