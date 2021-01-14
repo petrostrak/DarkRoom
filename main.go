@@ -31,6 +31,7 @@ func main() {
 	r := mux.NewRouter()
 	r.Handle("/", controllers.NewStatic().Home).Methods("GET")
 	r.Handle("/contact", controllers.NewStatic().Contact).Methods("GET")
+	// if the method implements the http.Handler interface, it need to be called from r.Handle instead of r.HandleFunc
 	r.HandleFunc("/signup", usersC.New).Methods("GET")
 	r.HandleFunc("/signup", usersC.Create).Methods("POST")
 	r.Handle("/login", usersC.LoginView).Methods("GET")
