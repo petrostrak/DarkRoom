@@ -13,7 +13,9 @@ var (
 	ErrNotFound = errors.New("models: resource not fould")
 	// is returned when an invalid ID is provided to a method
 	// like Delete
-	ErrInvalidID       = errors.New("models: ID provided was invalid")
+	ErrInvalidID = errors.New("models: ID provided was invalid")
+	// is returned when an invalid password is used when attempting to
+	// authenticate a user
 	ErrInvalidPassword = errors.New("models: Incorrect password provided")
 )
 
