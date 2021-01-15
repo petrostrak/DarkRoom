@@ -34,7 +34,7 @@ func NewUsers(us *models.UserService) *Users {
 	}
 }
 
-//This is used to render the form where a user can create a new user account
+// New is used to render the form where a user can create a new user account
 //
 // GET /signup
 func (u *Users) New(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +44,7 @@ func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// This is used to process the signup form when a user tries to create a new user account
+// Create is used to process the signup form when a user tries to create a new user account
 //
 // POST /signup
 func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
@@ -69,12 +69,13 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/cookietest", http.StatusFound)
 }
 
+// LoginForm struct
 type LoginForm struct {
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
 
-// is used to verify the provided email address and password and then
+// Login is used to verify the provided email address and password and then
 // log the user in if they are correct
 //
 // POST /login
@@ -119,14 +120,15 @@ func (u *Users) signIn(w http.ResponseWriter, user *models.User) error {
 		}
 	}
 	cookie := http.Cookie{
-		Name:  "remember_token",
-		Value: user.Remember,
+		Name:     "remember_token",
+		Value:    user.Remember,
+		HttpOnly: true,
 	}
 	http.SetCookie(w, &cookie)
 	return nil
 }
 
-// is used to display cookies set on the current user
+// CookieTest is used to display cookies set on the current user
 func (u *Users) CookieTest(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("remember_token")
 	if err != nil {
