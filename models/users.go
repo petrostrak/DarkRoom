@@ -6,17 +6,18 @@ import (
 	"errors"
 
 	"github.com/jinzhu/gorm"
+	// postgres
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var (
-	// when resource not found in DB
+	// ErrNotFound is used when resource not found in DB
 	ErrNotFound = errors.New("models: resource not fould")
-	// is returned when an invalid ID is provided to a method
+	// ErrInvalidID is returned when an invalid ID is provided to a method
 	// like Delete
 	ErrInvalidID = errors.New("models: ID provided was invalid")
-	// is returned when an invalid password is used when attempting to
+	// ErrInvalidPassword is returned when an invalid password is used when attempting to
 	// authenticate a user
 	ErrInvalidPassword = errors.New("models: Incorrect password provided")
 )
@@ -24,6 +25,7 @@ var (
 const userPwdPepper = "secret-random-string"
 const hmacSecretKey = "secret-hmac-key"
 
+// NewUserService instantiates a new User service
 func NewUserService(connectionInfo string) (*UserService, error) {
 	db, err := gorm.Open("postgres", connectionInfo)
 	if err != nil {
@@ -37,7 +39,7 @@ func NewUserService(connectionInfo string) (*UserService, error) {
 	}, nil
 }
 
-// drops user table and rebuilds it
+// DestructiveReset drops user table and rebuilds it
 func (us *UserService) DestructiveReset() error {
 	if err := us.db.DropTableIfExists(&User{}).Error; err != nil {
 		return err
@@ -45,6 +47,7 @@ func (us *UserService) DestructiveReset() error {
 	return us.AutoMigrate()
 }
 
+// AutoMigrate will migrate our data
 func (us *UserService) AutoMigrate() error {
 	if err := us.db.AutoMigrate(&User{}).Error; err != nil {
 		return err
@@ -52,19 +55,20 @@ func (us *UserService) AutoMigrate() error {
 	return nil
 }
 
+// UserService struct
 type UserService struct {
 	db   *gorm.DB
 	hmac hash.HMAC
 }
 
-// ById will look up a user by the id provided
+// ByID will look up a user by the id provided
 // 1 - user, nil. If user is found, return a nil error
 // 2 - nil, ErrNotFound. If user not found, return ErrNotFound
 // 3 - otherError. If other error occurs, return error in detail
 //
 // As a general rule, any error but ErrNotFound should probably
 // result in a 500 error.
-func (us UserService) ById(id uint) (*User, error) {
+func (us UserService) ByID(id uint) (*User, error) {
 	var user User
 	db := us.db.Where("id = ?", id)
 	err := first(db, &user)
@@ -97,7 +101,7 @@ func (us *UserService) ByRemember(token string) (*User, error) {
 	return &user, nil
 }
 
-// can be used to authenticate the user with the provided email address and password
+// Authenticate can be used to authenticate the user with the provided email address and password
 func (us *UserService) Authenticate(email, password string) (*User, error) {
 	foundUser, err := us.ByEmail(email)
 	if err != nil {
@@ -126,7 +130,7 @@ func first(db *gorm.DB, dst interface{}) error {
 	return err
 }
 
-// we don't return the user, instead we update the one we pass in
+// Create doesn't return the user, instead we update the one we pass in
 // therefore we use a pointer to User
 func (us *UserService) Create(user *User) error {
 	// implementing pepper
@@ -150,7 +154,7 @@ func (us *UserService) Create(user *User) error {
 	return us.db.Create(user).Error
 }
 
-// will update the provided user with all of the data
+// Update will update the provided user with all of the data
 // in the provided user object
 func (us *UserService) Update(user *User) error {
 	if user.Remember != "" {
@@ -159,7 +163,7 @@ func (us *UserService) Update(user *User) error {
 	return us.db.Save(user).Error
 }
 
-// will delete the user with the provided id
+// Delete will delete the user with the provided id
 func (us *UserService) Delete(id uint) error {
 	if id == 0 {
 		return ErrInvalidID
@@ -168,11 +172,12 @@ func (us *UserService) Delete(id uint) error {
 	return us.db.Delete(&user).Error
 }
 
-// closes the UserService db connection
+// Close closes the UserService db connection
 func (us *UserService) Close() error {
 	return us.db.Close()
 }
 
+// User struct
 type User struct {
 	gorm.Model
 	Name  string
