@@ -197,6 +197,11 @@ type userGorm struct {
 
 // Delete will delete the user with the provided id
 func (uv *userValidator) Delete(id uint) error {
+	var user User
+	user.ID = id
+	if err := runUserValFuncs(&user, uv.idGreaterThan(0)); err != nil {
+		return err
+	}
 	if id == 0 {
 		return ErrInvalidID
 	}
@@ -239,6 +244,15 @@ func (uv *userValidator) setRememberIfUnset(user *User) error {
 	}
 	user.Remember = token
 	return nil
+}
+
+func (uv *userValidator) idGreaterThan(n uint) userValFunc {
+	return userValFunc(func(user *User) error{
+		if user.ID <= n {
+			return ErrInvalidID
+		}
+		return nil
+	})
 }
 
 // ByID will look up a user by the id provided
