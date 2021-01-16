@@ -4,6 +4,7 @@ import (
 	"DarkRoom/hash"
 	"DarkRoom/rand"
 	"errors"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	// postgres
@@ -68,21 +69,21 @@ type UserDB interface {
 // work with the user model
 type UserService interface {
 	// Authenticate wii verify the provided email address and
-	// password are correct. If the are correct, the user 
-	// corresponding to that email will be returned 
+	// password are correct. If the are correct, the user
+	// corresponding to that email will be returned
 	Authenticate(email, password string) (*User, error)
 	UserDB
 }
 
 // NewUserService instantiates a new User service
 func NewUserService(connectionInfo string) (UserService, error) {
-	ug, err :=newUserGorm(connectionInfo)
+	ug, err := newUserGorm(connectionInfo)
 	if err != nil {
 		return nil, err
 	}
 	hmac := hash.NewHMAC(hmacSecretKey)
 	uv := &userValidator{
-		hmac: hmac,
+		hmac:   hmac,
 		UserDB: ug,
 	}
 	return &userService{
@@ -105,6 +106,8 @@ func (ug *userGorm) AutoMigrate() error {
 	}
 	return nil
 }
+
+var _ UserService = &userService{}
 
 // UserService struct
 type userService struct {
@@ -158,6 +161,18 @@ type userValidator struct {
 	hmac hash.HMAC
 }
 
+// ByEmail will normalize the email address before calling
+// ByEmail on the UserDB field
+func (uv *userValidator) ByEmail(email string) (*User, error) {
+	user := User{
+		Email: email,
+	}
+	if err := runUserValFuncs(&user, uv.normalizeEmail); err != nil {
+		return nil, err
+	}
+	return uv.UserDB.ByEmail(user.Email)
+}
+
 // ByRemember will hash the remember token and then call ByRemember
 // on the subsequent UserDB layer
 func (uv *userValidator) ByRemember(token string) (*User, error) {
@@ -173,9 +188,11 @@ func (uv *userValidator) ByRemember(token string) (*User, error) {
 // Create doesn't return the user, instead we update the one we pass in
 // therefore we use a pointer to User
 func (uv *userValidator) Create(user *User) error {
-	if err := runUserValFuncs(user, 
-		uv.bcryptPassword, uv.setRememberIfUnset, 
-		 uv.hmacRemember); err != nil {
+	if err := runUserValFuncs(user,
+		uv.bcryptPassword, 
+		uv.setRememberIfUnset,
+		uv.hmacRemember,
+		uv.normalizeEmail); err != nil {
 		return err
 	}
 	return uv.UserDB.Create(user)
@@ -183,7 +200,10 @@ func (uv *userValidator) Create(user *User) error {
 
 // Update will hash a remember token if it is provided
 func (uv *userValidator) Update(user *User) error {
-	if err := runUserValFuncs(user, uv.bcryptPassword, uv.hmacRemember); err != nil {
+	if err := runUserValFuncs(user, 
+		uv.bcryptPassword, 
+		uv.hmacRemember,
+		uv.normalizeEmail); err != nil {
 		return err
 	}
 	return uv.UserDB.Update(user)
@@ -192,7 +212,7 @@ func (uv *userValidator) Update(user *User) error {
 var _ UserDB = &userGorm{}
 
 type userGorm struct {
-	db   *gorm.DB
+	db *gorm.DB
 }
 
 // Delete will delete the user with the provided id
@@ -208,7 +228,7 @@ func (uv *userValidator) Delete(id uint) error {
 	return uv.UserDB.Delete(id)
 }
 
-// bcryptPassword will hash a user's password with a predefined 
+// bcryptPassword will hash a user's password with a predefined
 // pepper and bcrypt if the password field is not the empty string
 func (uv *userValidator) bcryptPassword(user *User) error {
 	if user.Password == "" {
@@ -247,12 +267,17 @@ func (uv *userValidator) setRememberIfUnset(user *User) error {
 }
 
 func (uv *userValidator) idGreaterThan(n uint) userValFunc {
-	return userValFunc(func(user *User) error{
+	return userValFunc(func(user *User) error {
 		if user.ID <= n {
 			return ErrInvalidID
 		}
 		return nil
 	})
+}
+
+func (uv *userValidator) normalizeEmail(user *User) error {
+	user.Email = strings.ToLower(strings.TrimSpace(user.Email))
+	return nil
 }
 
 // ByID will look up a user by the id provided
