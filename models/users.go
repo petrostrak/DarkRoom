@@ -173,15 +173,9 @@ func (uv *userValidator) ByRemember(token string) (*User, error) {
 // Create doesn't return the user, instead we update the one we pass in
 // therefore we use a pointer to User
 func (uv *userValidator) Create(user *User) error {
-	if user.Remember == "" {
-		token, err := rand.RememberToken()
-		if err != nil {
-			return err
-		}
-		user.Remember = token
-	}
-
-	if err := runUserValFuncs(user, uv.hmacRemember); err != nil {
+	if err := runUserValFuncs(user, 
+		uv.bcryptPassword, uv.setRememberIfUnset, 
+		 uv.hmacRemember); err != nil {
 		return err
 	}
 	return uv.UserDB.Create(user)
@@ -232,6 +226,18 @@ func (uv *userValidator) hmacRemember(user *User) error {
 		return nil
 	}
 	user.RememberHash = uv.hmac.Hash(user.RememberHash)
+	return nil
+}
+
+func (uv *userValidator) setRememberIfUnset(user *User) error {
+	if user.Remember != "" {
+		return nil
+	}
+	token, err := rand.RememberToken()
+	if err != nil {
+		return err
+	}
+	user.Remember = token
 	return nil
 }
 
