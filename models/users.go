@@ -192,7 +192,8 @@ func (uv *userValidator) Create(user *User) error {
 		uv.bcryptPassword, 
 		uv.setRememberIfUnset,
 		uv.hmacRemember,
-		uv.normalizeEmail); err != nil {
+		uv.normalizeEmail,
+		uv.requireEmail); err != nil {
 		return err
 	}
 	return uv.UserDB.Create(user)
@@ -203,13 +204,12 @@ func (uv *userValidator) Update(user *User) error {
 	if err := runUserValFuncs(user, 
 		uv.bcryptPassword, 
 		uv.hmacRemember,
-		uv.normalizeEmail); err != nil {
+		uv.normalizeEmail,
+		uv.requireEmail); err != nil {
 		return err
 	}
 	return uv.UserDB.Update(user)
 }
-
-var _ UserDB = &userGorm{}
 
 type userGorm struct {
 	db *gorm.DB
@@ -279,6 +279,15 @@ func (uv *userValidator) normalizeEmail(user *User) error {
 	user.Email = strings.ToLower(strings.TrimSpace(user.Email))
 	return nil
 }
+
+func (uv *userValidator) requireEmail(user *User) error {
+	if user.Email == "" {
+		return errors.New("Email address is required")
+	}
+	return nil 
+}
+
+var _ UserDB = &userGorm{} 
 
 // ByID will look up a user by the id provided
 // 1 - user, nil. If user is found, return a nil error
