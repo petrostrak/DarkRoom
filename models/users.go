@@ -65,16 +65,13 @@ type UserService interface {
 }
 
 // NewUserService instantiates a new User service
-func NewUserService(connectionInfo string) (UserService, error) {
-	ug, err := newUserGorm(connectionInfo)
-	if err != nil {
-		return nil, err
-	}
+func NewUserService(db *gorm.DB) UserService {
+	ug := &userGorm{db}
 	hmac := hash.NewHMAC(hmacSecretKey)
 	uv := newUserValidator(ug, hmac)
 	return &userService{
 		UserDB: uv,
-	}, nil
+	}
 }
 
 // DestructiveReset drops user table and rebuilds it
@@ -130,17 +127,6 @@ func runUserValFuncs(user *User, fns ...userValFunc) error {
 }
 
 var _ UserDB = &userValidator{}
-
-func newUserGorm(connectionInfo string) (*userGorm, error) {
-	db, err := gorm.Open("postgres", connectionInfo)
-	if err != nil {
-		return nil, err
-	}
-	db.LogMode(true)
-	return &userGorm{
-		db: db,
-	}, nil
-}
 
 func newUserValidator(udb UserDB, hmac hash.HMAC) *userValidator {
 	return &userValidator{
