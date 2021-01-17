@@ -4,6 +4,7 @@ import (
 	"DarkRoom/hash"
 	"DarkRoom/rand"
 	"errors"
+	"regexp"
 	"strings"
 
 	"github.com/jinzhu/gorm"
@@ -21,6 +22,11 @@ var (
 	// ErrInvalidPassword is returned when an invalid password is used when attempting to
 	// authenticate a user
 	ErrInvalidPassword = errors.New("models: Incorrect password provided")
+	// ErrEmailRequired is returned when an email address is not provided
+	ErrEmailRequired = errors.New("models: Email address is required")
+	// ErrEmailInvalid is returned when an email address provided does not match
+	// any of our requirements
+	ErrEmailInvalid = errors.New("models: Email address is not valid")
 )
 
 const userPwdPepper = "secret-random-string"
@@ -156,9 +162,18 @@ func newUserGorm(connectionInfo string) (*userGorm, error) {
 	}, nil
 }
 
+func newUserValidator(udb UserDB, hmac hash.HMAC) *userValidator {
+	return &userValidator{
+		UserDB:     udb,
+		hmac:       hmac,
+		emailRegex: regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,16}$`),
+	}
+}
+
 type userValidator struct {
 	UserDB
-	hmac hash.HMAC
+	hmac       hash.HMAC
+	emailRegex *regexp.Regexp
 }
 
 // ByEmail will normalize the email address before calling
@@ -189,11 +204,12 @@ func (uv *userValidator) ByRemember(token string) (*User, error) {
 // therefore we use a pointer to User
 func (uv *userValidator) Create(user *User) error {
 	if err := runUserValFuncs(user,
-		uv.bcryptPassword, 
+		uv.bcryptPassword,
 		uv.setRememberIfUnset,
 		uv.hmacRemember,
 		uv.normalizeEmail,
-		uv.requireEmail); err != nil {
+		uv.requireEmail,
+		uv.emailFormat); err != nil {
 		return err
 	}
 	return uv.UserDB.Create(user)
@@ -201,11 +217,12 @@ func (uv *userValidator) Create(user *User) error {
 
 // Update will hash a remember token if it is provided
 func (uv *userValidator) Update(user *User) error {
-	if err := runUserValFuncs(user, 
-		uv.bcryptPassword, 
+	if err := runUserValFuncs(user,
+		uv.bcryptPassword,
 		uv.hmacRemember,
 		uv.normalizeEmail,
-		uv.requireEmail); err != nil {
+		uv.requireEmail,
+		uv.emailFormat); err != nil {
 		return err
 	}
 	return uv.UserDB.Update(user)
@@ -282,12 +299,22 @@ func (uv *userValidator) normalizeEmail(user *User) error {
 
 func (uv *userValidator) requireEmail(user *User) error {
 	if user.Email == "" {
-		return errors.New("Email address is required")
+		return ErrEmailRequired
 	}
-	return nil 
+	return nil
 }
 
-var _ UserDB = &userGorm{} 
+func (uv *userValidator) emailFormat(user *User) error {
+	if user.Email == "" {
+		return nil
+	}
+	if !uv.emailRegex.MatchString(user.Email) {
+		return ErrEmailInvalid
+	}
+	return nil
+}
+
+var _ UserDB = &userGorm{}
 
 // ByID will look up a user by the id provided
 // 1 - user, nil. If user is found, return a nil error
