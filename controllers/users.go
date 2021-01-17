@@ -39,21 +39,11 @@ func NewUsers(us models.UserService) *Users {
 // GET /signup
 func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	type Alert struct {
-		Level   string
-		Message string
-	}
-	type Data struct {
-		Alert Alert
-		Yield interface{}
-	}
-	a := Alert{
-		Level:   "success",
-		Message: "Successfully render a dynamic alert!",
-	}
-	d := Data{
-		Alert: a,
-		Yield: "Hello!",
+	d := views.Data{
+		Alert: &views.Alert{
+			Level: views.AlertLvlError,
+			Message: "Something went wrong",
+		},
 	}
 	if err := u.NewView.Render(w, d); err != nil {
 		panic(err)
