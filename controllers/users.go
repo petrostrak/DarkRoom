@@ -40,14 +40,22 @@ func NewUsers(us models.UserService) *Users {
 func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	type Alert struct {
-		Level string
+		Level   string
 		Message string
 	}
+	type Data struct {
+		Alert Alert
+		Yield interface{}
+	}
 	a := Alert{
-		Level: "success",
+		Level:   "success",
 		Message: "Successfully render a dynamic alert!",
 	}
-	if err := u.NewView.Render(w, a); err != nil {
+	d := Data{
+		Alert: a,
+		Yield: "Hello!",
+	}
+	if err := u.NewView.Render(w, d); err != nil {
 		panic(err)
 	}
 }
