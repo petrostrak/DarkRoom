@@ -2,6 +2,7 @@ package main
 
 import (
 	"DarkRoom/controllers"
+	"DarkRoom/middleware"
 	"DarkRoom/models"
 	"fmt"
 	"net/http"
@@ -28,6 +29,7 @@ func main() {
 	// staticC := controllers.NewStatic()
 	usersC := controllers.NewUsers(services.User)
 	galleriesC := controllers.NewGalleries(services.Gallery)
+	requireUserMw := middleware.RequireUser{services.User}
 
 	r := mux.NewRouter()
 	r.Handle("/", controllers.NewStatic().Home).Methods("GET")
@@ -40,8 +42,8 @@ func main() {
 	r.HandleFunc("/cookietest", usersC.CookieTest).Methods("GET")
 
 	// Gallery routes
-	r.Handle("/galleries/new", galleriesC.New).Methods("GET")
-	r.HandleFunc("/galleries", galleriesC.Create).Methods("POST")
+	r.Handle("/galleries/new", requireUserMw.Apply(galleriesC.New)).Methods("GET")
+	r.HandleFunc("/galleries", requireUserMw.ApplyFn(galleriesC.Create)).Methods("POST")
 
 	http.ListenAndServe(":3000", r)
 }
