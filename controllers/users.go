@@ -35,14 +35,6 @@ type SignupForm struct {
 	Password string `schema:"password"`
 }
 
-// New is used to render the form where a user can create a new user account
-//
-// GET /signup
-func (u *Users) New(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	u.NewView.Render(w, nil)
-}
-
 // Create is used to process the signup form when a user tries to create a new user account
 //
 // POST /signup
@@ -71,6 +63,14 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/cookietest", http.StatusFound)
+}
+
+// New is used to render the form where a user can create a new user account
+//
+// GET /signup
+func (u *Users) New(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	u.NewView.Render(w, nil)
 }
 
 // LoginForm struct
