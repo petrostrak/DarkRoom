@@ -1,13 +1,16 @@
 package views
 
+import (
+	"DarkRoom/models"
+)
+
 const (
-	AlertLvlError = "danger"
+	AlertLvlError   = "danger"
 	AlertLvlWarning = "warning"
-	AlertLvlInfo = "info"
+	AlertLvlInfo    = "info"
 	AlertLvlSuccess = "success"
 	AlertMsgGeneric = "Something went wrong. Please try again, and contact us if the problem persists."
 )
-
 
 // Alert is used to render bootstrap alert messages in templates
 type Alert struct {
@@ -18,18 +21,19 @@ type Alert struct {
 // Data is the top level structure that views expect data to come in
 type Data struct {
 	Alert *Alert
+	User  *models.User
 	Yield interface{}
 }
 
 func (d *Data) SetAlert(err error) {
 	if pErr, ok := err.(PublicError); ok {
 		d.Alert = &Alert{
-			Level: AlertLvlError,
+			Level:   AlertLvlError,
 			Message: pErr.Public(),
 		}
 	} else {
 		d.Alert = &Alert{
-			Level: AlertLvlError,
+			Level:   AlertLvlError,
 			Message: AlertMsgGeneric,
 		}
 	}
@@ -37,7 +41,7 @@ func (d *Data) SetAlert(err error) {
 
 func (d *Data) AlertError(msg string) {
 	d.Alert = &Alert{
-		Level: AlertLvlError,
+		Level:   AlertLvlError,
 		Message: msg,
 	}
 }

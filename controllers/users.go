@@ -4,7 +4,6 @@ import (
 	"DarkRoom/models"
 	"DarkRoom/rand"
 	"DarkRoom/views"
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -44,7 +43,7 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 	if err := parseForm(r, &form); err != nil {
 		log.Println(err)
 		vd.SetAlert(err)
-		u.NewView.Render(w, vd)
+		u.NewView.Render(w, r, vd)
 		return
 	}
 	user := models.User{
@@ -54,7 +53,7 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := u.us.Create(&user); err != nil {
 		vd.SetAlert(err)
-		u.NewView.Render(w, vd)
+		u.NewView.Render(w, r, vd)
 		return
 	}
 	err := u.signIn(w, &user)
@@ -62,7 +61,7 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
-	http.Redirect(w, r, "/cookietest", http.StatusFound)
+	http.Redirect(w, r, "/galleries/new", http.StatusFound)
 }
 
 // New is used to render the form where a user can create a new user account
@@ -70,7 +69,7 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 // GET /signup
 func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	u.NewView.Render(w, nil)
+	u.NewView.Render(w, r, nil)
 }
 
 // LoginForm struct
@@ -89,7 +88,7 @@ func (u *Users) Login(w http.ResponseWriter, r *http.Request) {
 	if err := parseForm(r, &form); err != nil {
 		log.Println(err)
 		vd.SetAlert(err)
-		u.LoginView.Render(w, vd)
+		u.LoginView.Render(w, r, vd)
 		return
 	}
 
@@ -101,17 +100,17 @@ func (u *Users) Login(w http.ResponseWriter, r *http.Request) {
 		default:
 			vd.SetAlert(err)
 		}
-		u.LoginView.Render(w, vd)
+		u.LoginView.Render(w, r, vd)
 		return
 	}
 	// if no error occured during the login, then create the cookie
 	err = u.signIn(w, user)
 	if err != nil {
 		vd.SetAlert(err)
-		u.LoginView.Render(w, vd)
+		u.LoginView.Render(w, r, vd)
 		return
 	}
-	http.Redirect(w, r, "/cookietest", http.StatusFound)
+	http.Redirect(w, r, "/galleries", http.StatusFound)
 }
 
 // create cookie method
@@ -134,19 +133,4 @@ func (u *Users) signIn(w http.ResponseWriter, user *models.User) error {
 	}
 	http.SetCookie(w, &cookie)
 	return nil
-}
-
-// CookieTest is used to display cookies set on the current user
-func (u *Users) CookieTest(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("remember_token")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-	user, err := u.us.ByRemember(cookie.Value)
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-	fmt.Fprintln(w, user)
 }
