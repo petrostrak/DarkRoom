@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"DarkRoom/context"
 	"DarkRoom/models"
 	"fmt"
 	"net/http"
@@ -26,8 +27,10 @@ func (mw *RequireUser) ApplyFn(next http.HandlerFunc) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
+		ctx := r.Context()
+		ctx = context.WithUser(ctx, user)
+		r = r.WithContext(ctx)
 		fmt.Println("User found:", user)
-
 		// if the user is logged in..
 		next(w, r)
 	})
