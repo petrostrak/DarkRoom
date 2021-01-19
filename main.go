@@ -26,12 +26,12 @@ func main() {
 	services.AutoMigrate()
 	// services.DestructiveReset()
 
+	r := mux.NewRouter()
 	// staticC := controllers.NewStatic()
 	usersC := controllers.NewUsers(services.User)
-	galleriesC := controllers.NewGalleries(services.Gallery)
+	galleriesC := controllers.NewGalleries(services.Gallery, r)
 	requireUserMw := middleware.RequireUser{services.User}
 
-	r := mux.NewRouter()
 	r.Handle("/", controllers.NewStatic().Home).Methods("GET")
 	r.Handle("/contact", controllers.NewStatic().Contact).Methods("GET")
 	// if the method implements the http.Handler interface, it need to be called from r.Handle instead of r.HandleFunc
@@ -44,6 +44,7 @@ func main() {
 	// Gallery routes
 	r.Handle("/galleries/new", requireUserMw.Apply(galleriesC.New)).Methods("GET")
 	r.HandleFunc("/galleries", requireUserMw.ApplyFn(galleriesC.Create)).Methods("POST")
+	r.HandleFunc("/galleries/{id:[0-9]+}", galleriesC.Show).Methods("GET").Name(controllers.ShowGallery)
 
 	http.ListenAndServe(":3000", r)
 }
