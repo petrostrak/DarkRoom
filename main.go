@@ -4,9 +4,11 @@ import (
 	"DarkRoom/controllers"
 	"DarkRoom/middleware"
 	"DarkRoom/models"
+	"DarkRoom/rand"
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
 
@@ -31,6 +33,10 @@ func main() {
 	usersC := controllers.NewUsers(services.User)
 	galleriesC := controllers.NewGalleries(services.Gallery, services.Image, r)
 
+	isProd := false
+	b, err := rand.Bytes(32)
+	must(err)
+	csrfMw := csrf.Protect(b, csrf.Secure(isProd))
 	userMw := middleware.User{UserService: services.User}
 	requireUserMw := middleware.RequireUser{User: userMw}
 
@@ -64,7 +70,7 @@ func main() {
 	r.HandleFunc("/galleries/{id:[0-9]+}/images", requireUserMw.ApplyFn(galleriesC.ImageUpload)).Methods("POST")
 	r.HandleFunc("/galleries/{id:[0-9]+}/images/{filename}/delete", requireUserMw.ApplyFn(galleriesC.ImageDelete)).Methods("POST")
 
-	http.ListenAndServe(":3000", userMw.Apply(r))
+	http.ListenAndServe(":3000", csrfMw(userMw.Apply(r)))
 }
 
 func must(err error) {
