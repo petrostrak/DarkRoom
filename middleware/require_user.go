@@ -4,6 +4,7 @@ import (
 	"DarkRoom/context"
 	"DarkRoom/models"
 	"net/http"
+	"strings"
 )
 
 type User struct {
@@ -16,6 +17,16 @@ func (mw *User) Apply(next http.Handler) http.HandlerFunc {
 
 func (mw *User) ApplyFn(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		// if the user is requesting a static asset or image
+		// we will not need to lookup the current user so we
+		// skip the cookie check
+		if strings.HasPrefix(path, "/assets/") ||
+			strings.HasPrefix(path, "/images/") {
+			next(w, r)
+			return
+		}
+
 		cookie, err := r.Cookie("remember_token")
 		if err != nil {
 			next(w, r)
