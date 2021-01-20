@@ -42,6 +42,11 @@ func main() {
 	r.Handle("/login", usersC.LoginView).Methods("GET")
 	r.HandleFunc("/login", usersC.Login).Methods("POST")
 
+	// Assets
+	assetsHandler := http.FileServer(http.Dir("./assets/"))
+	assetsHandler = http.StripPrefix("/assets/", assetsHandler)
+	r.PathPrefix("/assets/").Handler(assetsHandler)
+
 	// Image routes
 	imageHandler := http.FileServer(http.Dir("./images/"))
 	r.PathPrefix("/images/").Handler(http.StripPrefix("/images/", imageHandler))
