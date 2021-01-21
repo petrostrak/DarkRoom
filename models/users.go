@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
-	// postgres
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"golang.org/x/crypto/bcrypt"
 )
 
