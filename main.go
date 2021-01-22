@@ -15,7 +15,13 @@ import (
 func main() {
 	cfg := DefaultConfig()
 	dbCfg := DefaultPostgresConfig()
-	services, err := models.NewServices(dbCfg.Dialect(), dbCfg.ConnectionInfo())
+	services, err := models.NewServices(
+		models.WithGorm(dbCfg.Dialect(), dbCfg.ConnectionInfo()),
+		models.WithLogMode(!cfg.IsProd()),
+		models.WithUser(cfg.Pepper, cfg.HMACKey),
+		models.WithGallery(),
+		models.WithImage(),
+	)
 	must(err)
 	defer services.Close()
 	services.AutoMigrate()
@@ -26,7 +32,6 @@ func main() {
 	usersC := controllers.NewUsers(services.User)
 	galleriesC := controllers.NewGalleries(services.Gallery, services.Image, r)
 
-	isProd := false
 	b, err := rand.Bytes(32)
 	must(err)
 	csrfMw := csrf.Protect(b, csrf.Secure(cfg.IsProd()))
