@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"DarkRoom/context"
 	"DarkRoom/models"
 	"DarkRoom/rand"
 	"DarkRoom/views"
 	"log"
 	"net/http"
+	"time"
 )
 
 // NewUsers is used to create a new Users controller.
@@ -110,6 +112,22 @@ func (u *Users) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/galleries", http.StatusFound)
+}
+
+func (u *Users) Logout(w http.ResponseWriter, r *http.Request) {
+	cookie := http.Cookie{
+		Name:     "remember_token",
+		Value:    "",
+		Expires:  time.Now(),
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
+
+	user := context.User(r.Context())
+	token, _ := rand.RememberToken()
+	user.Remember = token
+	u.us.Update(user)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 // create cookie method
