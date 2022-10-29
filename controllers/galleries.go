@@ -1,13 +1,14 @@
 package controllers
 
 import (
-	"DarkRoom/context"
-	"DarkRoom/models"
-	"DarkRoom/views"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/petrostrak/darkroom/context"
+	"github.com/petrostrak/darkroom/models"
+	"github.com/petrostrak/darkroom/views"
 
 	"github.com/gorilla/mux"
 )
@@ -199,8 +200,9 @@ func (g *Galleries) ImageUpload(w http.ResponseWriter, r *http.Request) {
 
 // POST /images/delete
 // data:
-//		GalleryID
-//		filename
+//
+//	GalleryID
+//	filename
 func (g *Galleries) ImageDelete(w http.ResponseWriter, r *http.Request) {
 	gallery, err := g.galleryByID(w, r)
 	if err != nil {

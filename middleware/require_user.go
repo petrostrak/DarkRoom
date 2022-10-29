@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"DarkRoom/context"
-	"DarkRoom/models"
 	"net/http"
 	"strings"
+
+	"github.com/petrostrak/darkroom/context"
+	"github.com/petrostrak/darkroom/models"
 )
 
 type User struct {

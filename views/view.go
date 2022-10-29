@@ -1,13 +1,14 @@
 package views
 
 import (
-	"DarkRoom/context"
 	"bytes"
 	"errors"
 	"html/template"
 	"io"
 	"net/http"
 	"path/filepath"
+
+	"github.com/petrostrak/darkroom/context"
 
 	"github.com/gorilla/csrf"
 )
@@ -76,7 +77,7 @@ func (v *View) Render(w http.ResponseWriter, r *http.Request, data interface{}) 
 		},
 	})
 	if err := tpl.ExecuteTemplate(&buf, v.Layout, vd); err != nil {
-		http.Error(w, "Something went wrong. If the proplem persists, please email us at support@darkroom.com", http.StatusInternalServerError)
+		http.Error(w, "Something went wrong. If the proplem persists, please email us at support@github.com/petrostrak/darkroom.com", http.StatusInternalServerError)
 		return
 	}
 	io.Copy(w, &buf)

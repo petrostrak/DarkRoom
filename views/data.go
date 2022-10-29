@@ -1,10 +1,11 @@
 package views
 
 import (
-	"DarkRoom/models"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/petrostrak/darkroom/models"
 )
 
 const (

@@ -1,13 +1,14 @@
 package controllers
 
 import (
-	"DarkRoom/context"
-	"DarkRoom/models"
-	"DarkRoom/rand"
-	"DarkRoom/views"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/petrostrak/darkroom/context"
+	"github.com/petrostrak/darkroom/models"
+	"github.com/petrostrak/darkroom/rand"
+	"github.com/petrostrak/darkroom/views"
 )
 
 // NewUsers is used to create a new Users controller.
@@ -65,7 +66,7 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	alert := views.Alert{
 		Level:   views.AlertLvlSuccess,
-		Message: "Welcome to DarkRoom.com!",
+		Message: "Welcome to github.com/petrostrak/darkroom.com!",
 	}
 	views.RedirectAlert(w, r, "/galleries", http.StatusFound, alert)
 }

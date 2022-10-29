@@ -57,7 +57,7 @@ func DefaultConfig() Config {
 	}
 }
 
-func LoadCOnfig(configReq bool) Config {
+func LoadConfig(configReq bool) Config {
 	f, err := os.Open(".config")
 	if err != nil {
 		if configReq {

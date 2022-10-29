@@ -1,6 +1,6 @@
 package controllers
 
-import "DarkRoom/views"
+import "github.com/petrostrak/darkroom/views"
 
 func NewStatic() *Static {
 	return &Static{

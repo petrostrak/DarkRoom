@@ -1,10 +1,11 @@
 package models
 
 import (
-	"DarkRoom/hash"
-	"DarkRoom/rand"
 	"regexp"
 	"strings"
+
+	"github.com/petrostrak/darkroom/hash"
+	"github.com/petrostrak/darkroom/rand"
 
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"

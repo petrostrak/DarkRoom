@@ -1,8 +1,9 @@
 package context
 
 import (
-	"DarkRoom/models"
 	"context"
+
+	"github.com/petrostrak/darkroom/models"
 )
 
 const (

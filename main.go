@@ -1,13 +1,14 @@
 package main
 
 import (
-	"DarkRoom/controllers"
-	"DarkRoom/middleware"
-	"DarkRoom/models"
-	"DarkRoom/rand"
 	"flag"
 	"fmt"
 	"net/http"
+
+	"github.com/petrostrak/darkroom/controllers"
+	"github.com/petrostrak/darkroom/middleware"
+	"github.com/petrostrak/darkroom/models"
+	"github.com/petrostrak/darkroom/rand"
 
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
@@ -17,7 +18,7 @@ func main() {
 	boolPtr := flag.Bool("prod", false, "Provide this flag in production. This ensures that a .config file is provided before the application starts.")
 	flag.Parse()
 
-	cfg := LoadCOnfig(*boolPtr)
+	cfg := LoadConfig(*boolPtr)
 	dbCfg := cfg.Database
 	services, err := models.NewServices(
 		models.WithGorm(dbCfg.Dialect(), dbCfg.ConnectionInfo()),
